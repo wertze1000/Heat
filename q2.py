@@ -39,7 +39,7 @@ NuFluid = ((frictionCoeff/8)*(ReFluid-1000)*PrFluid)/(1 + 12.7*(np.sqrt(friction
 k = LinReg(116, 117, 483, 473, Tm) #k * 10**3 /!\
 
 hi = NuFluid * k*10**(-3) / Di 
-print("Internal calculated numbers: ", "Reynolds", ReFluid, "Prandlt", PrFluid, "f", frictionCoeff, "Nusselt", NuFluid,"k" ,k*10**(-3), "Convection coeff", hi)
+print("Internal calculated numbers: ", "Reynolds", ReFluid, "Prandlt", PrFluid, "f", frictionCoeff, "Nusselt", NuFluid,"k" ,k*10**(-3), "Convection coeff hi", hi)
 
 
 #External flow calculations:
