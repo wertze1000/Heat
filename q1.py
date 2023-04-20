@@ -14,6 +14,8 @@ def iter(z):
     Tcp = (Tfout + Tfin) / 2
     cp = LinReg(2.040*10**3, 2.067*10**3, 473, 483, Tcp)
     F = np.empty((1))
+
+    print("cp =", cp)
     
     F[0] = mfdot*cp*(Tfout - (150 + 273.15)) - qsolar
     return F

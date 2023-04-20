@@ -9,7 +9,8 @@ W = 2.5
 L = 30
 d = 6*10**(-2) #cm to m
 e = 2*10**(-2)
-Di = d - 2*e #Internal diameter
+Di = d #Internal diameter
+Kglass = 1.4
 
 #External flow properties:
 Tair = 25 + 273.15 #K
@@ -25,7 +26,7 @@ Tfout = fsolve(iter, initGuess)
 
 Tmi = Tfin
 Tmo = Tfout
-Tm = ((Tmi + Tmo)/2 + Tair) / 2 #Mean internal flow temperature (K)
+Tm = (Tmi + Tmo)/2 #Mean internal flow temperature (K)
 
 mui = LinReg(0.048, 0.044, 473, 483, Tm) #mu * 10**2 /!\
 
@@ -47,7 +48,21 @@ print("Internal calculated numbers: ", "Reynolds", ReFluid, "Prandlt", PrFluid, 
 250 1.3947 1.006 159.6 11.44 22.3 15.9 0.720
 300 1.1614 1.007 184.6 15.89 26.3 22.5 0.707
 '''
+ho = 19.84
 
 #LinReg for Prandlt (Air at 25C)
 PrAir = LinReg(0.720, 0.707, 250, 300, 298.15)
 print("External calculated numbers: ", "Reynolds", "--", "Prandlt", PrAir, "f", "--", "Nusselt", "--")
+#Q3 + 2 Tf(x):
+cp = 2039.4485851119996 #(LinReg would be better)
+
+C = (750*W)/(mfdot*cp)
+B = ((1/hi) + (Di)/(2*Kglass)*np.log((Di + 2*e)/(Di)) + (Di)/(Di + 2*e)*(1/ho))*mfdot*cp
+D = (np.pi*Di) / B
+E = C + (np.pi*Di)*(1 + Tair)/B
+print(D, E) #https://www.dcode.fr/solveur-equation-differentielle f' + D*f = E
+#newTfout = 488
+newTfout = 758.504 - 335.354*np.exp((-0.00720516)*30)
+print(newTfout)
+efficiency = (newTfout - Tfin)/(Tfout - Tfin)
+print(efficiency * 100, "%")
