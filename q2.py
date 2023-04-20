@@ -25,20 +25,20 @@ Tfout = fsolve(iter, initGuess)
 
 Tmi = Tfin
 Tmo = Tfout
-Tm = (Tmi + Tmo) / 2 #Mean internal flow temperature (K)
+Tm = ((Tmi + Tmo)/2 + Tair) / 2 #Mean internal flow temperature (K)
 
 mui = LinReg(0.048, 0.044, 473, 483, Tm) #mu * 10**2 /!\
 
 print("Internal flow properties:", "Tfout =", Tfout, "Tm", Tm, "mui", mui*10**-2)
 
 #Internal flow calculations:
-ReFluid = 4*mfdot / (np.pi * Di * mui*10**-2)
+ReFluid = (4 * mfdot) / (np.pi * Di * mui*10**(-2))
 PrFluid = LinReg(8.4, 8.9, 473, 463 , Tm)
-frictionCoeff = 1/(0.790*np.log(ReFluid) - 1.64)**2 #8.21 (p474)
-NuFluid = ((frictionCoeff/8)*(ReFluid-1000)*PrFluid)/(1 + 12.7*(np.sqrt(frictionCoeff/8))*(math.pow(PrFluid, 2/3) - 1)) #Gnielinski 8.62 (All properties at Tm)
+frictionCoeff = 1/((0.790*np.log(ReFluid) - 1.64)**2) #8.21 (p474)
+NuFluid = ((frictionCoeff/8)*(ReFluid - 1000)*PrFluid)/(1 + 12.7*(np.sqrt(frictionCoeff/8))*(math.pow(PrFluid, 2/3) - 1)) #Gnielinski 8.62 (All properties at Tm)
 k = LinReg(116, 117, 483, 473, Tm) #k * 10**3 /!\
 
-hi = NuFluid * k*10**(-3) / Di 
+hi = (NuFluid * k*10**(-3)) / Di 
 print("Internal calculated numbers: ", "Reynolds", ReFluid, "Prandlt", PrFluid, "f", frictionCoeff, "Nusselt", NuFluid,"k" ,k*10**(-3), "Convection coeff hi", hi)
 
 
