@@ -4,6 +4,11 @@ from scipy.optimize import fsolve
 from heat import LinReg
 import math
 
+#Q1 temps
+initGuess = np.array([500])
+Tfout = fsolve(iter, initGuess)
+Tfin = 150 + 273.15 #K (423.15)
+
 #Problem geometry:
 W = 2.5
 L = 30
@@ -13,17 +18,21 @@ Di = d #Internal diameter
 Kglass = 1.4
 
 #External flow properties:
+vInf = 3 #m/s
 Tair = 25 + 273.15 #K
+TmAir = ((Tfin + Tfout)/2 + Tair)/2
+muAir = LinReg(184.6, 159.6, 300, 250, TmAir)*10**(-7)
+kAir = LinReg(26.3, 22.3, 300, 250, TmAir)*10**(-3)
+
+''' TABLE A4 (Air: T , rho, Cp, mu * 10**7, nu*10**6, k*10**3, alpha*10**6, Pr)
+250 1.3947 1.006 159.6 11.44 22.3 15.9 0.720
+300 1.1614 1.007 184.6 15.89 26.3 22.5 0.707
+'''
 
 #Internal flow properties:
 mfdot = 1000 / 3600 #Kg/s
 
 #-> Internal flow temperatures:
-Tfin = 150 + 273.15 #K
-
-initGuess = np.array([500])
-Tfout = fsolve(iter, initGuess)
-
 Tmi = Tfin
 Tmo = Tfout
 Tm = (Tmi + Tmo)/2 #Mean internal flow temperature (K)
@@ -44,25 +53,32 @@ print("Internal calculated numbers: ", "Reynolds", ReFluid, "Prandlt", PrFluid, 
 
 
 #External flow calculations:
-''' TABLE A4 (Air: T , rho, Cp, mu * 10**7, nu*10**6, k*10**3, alpha*10**6, Pr)
-250 1.3947 1.006 159.6 11.44 22.3 15.9 0.720
-300 1.1614 1.007 184.6 15.89 26.3 22.5 0.707
-'''
-ho = 19.84
 
 #LinReg for Prandlt (Air at 25C)
 PrAir = LinReg(0.720, 0.707, 250, 300, 298.15)
-print("External calculated numbers: ", "Reynolds", "--", "Prandlt", PrAir, "f", "--", "Nusselt", "--")
+ReAir = (vInf*(Di + 2*e)) / (muAir)
+
+#Nusselt with 7.52 p420 (Hilpert)
+#[Re 4000–40000 -> C = 0.193 , m = 0.618]
+cConstant = 0.193
+mConstant = 0.618
+
+NuAir = cConstant*(ReAir**mConstant)*math.pow(PrAir, 1/3)
+hoMean = (NuAir*kAir)/(Di + 2*e)
+
+print("External calculated numbers: ", "Reynolds", ReAir, "Prandlt", PrAir, "f", "none", "Nusselt", NuAir, "convection coeff mean ho", hoMean)
 #Q3 + 2 Tf(x):
-cp = 2039.4485851119996 #(LinReg would be better)
+
+cp = LinReg(2.040,2.067,473,483, Tm)*10**3  #(LinReg at Tm for cp of internal flow)
 
 C = (750*W)/(mfdot*cp)
-B = ((1/hi) + (Di)/(2*Kglass)*np.log((Di + 2*e)/(Di)) + (Di)/(Di + 2*e)*(1/ho))*mfdot*cp
+B = ((1/hi) + (Di)/(2*Kglass)*np.log((Di + 2*e)/(Di)) + (Di)/(Di + 2*e)*(1/hoMean))*mfdot*cp
 D = (np.pi*Di) / B
 E = C + (np.pi*Di)*(1 + Tair)/B
-print(D, E) #https://www.dcode.fr/solveur-equation-differentielle f' + D*f = E
+print("Differential equation: ","f' + ", D, "f = ", E) #https://www.dcode.fr/solveur-equation-differentielle f' + D*f = E
 #newTfout = 488
-newTfout = 758.504 - 335.354*np.exp((-0.00720516)*30)
-print(newTfout)
+
+newTfout = 755.277 - 332.127*np.exp((-0.00725613)*30)
+
 efficiency = (newTfout - Tfin)/(Tfout - Tfin)
-print(efficiency * 100, "%")
+print("New Tfout =", newTfout, "Efficiency =", efficiency * 100, "%")
