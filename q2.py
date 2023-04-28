@@ -82,3 +82,8 @@ newTfout = 755.277 - 332.127*np.exp((-0.00725613)*30)
 
 efficiency = (newTfout - Tfin)/(Tfout - Tfin)
 print("New Tfout =", newTfout, "Efficiency =", efficiency * 100, "%")
+
+qloss= (1/((1/hi) + (Di)/(2*Kglass)*np.log((Di + 2*e)/(Di)) + (Di)/(Di + 2*e)*(1/hoMean))) * np.pi*Di*L*(488.12 - Tair)
+qsolar = 750*W*L
+qtot = qsolar - qloss
+print("qsolar", qsolar, " - qloss",qloss, "qtot", qtot)
